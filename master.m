@@ -1,0 +1,46 @@
+close all;
+clearvars;
+clc;
+
+% Analysis plan based on "analysisplan" excel file
+analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\Code files v 2\analysisplan.xls';
+[~,mypath,~] = xlsread(analysisplan,'path');
+nd2path = mypath{1,2};
+trackpath = mypath{2,2};
+output = mypath{3,2};
+bfmatlab = mypath{4,2};
+addpath(bfmatlab);
+featurespath = mypath{5,2};
+codepath = mypath{6,2};
+addpath(codepath);
+
+% create map for decoding treatment
+classMap = containers.Map({1,2},{'Control', 'HA'});
+
+% Extract metadata from nd2 files and save to output path
+extractmetadata (nd2path,output);
+
+% Extract raw data from tracking data
+% exTRACKtRAWdata ( trackpath , output ); % uncomment to process in batches
+tic
+disp('Extracting raw data...')
+extractRawData_alt ( trackpath , output ); % process each row individually
+disp('Raw data extracted!')
+toc
+
+% Extract data from rawdata and metadata
+tic
+disp('Extracting data...')
+extractData( output )
+disp('Data extracted!')
+toc
+
+% Extract features from data
+tic
+disp('Extracting features...')
+extractFeatures( output )
+disp('Features extracted!')
+toc
+
+% Visualize data
+% migrationvis(featurespath,output)
