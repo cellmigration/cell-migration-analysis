@@ -1,17 +1,14 @@
-function [  ] = extractFeatures( output )
+function [  ] = extractFeatures(output, analysisplan)
 %UNTITLED7 Summary of this function goes here
 %   Detailed explanation goes here
 
 % Update: with the 2 extra columns ([collagen] and treatment), I changed
 %         the time column index from 6 to 8 (lines 29, 33, 39) (P.A. 6/16/18)
 %
-% Update: found bug on ines 21 and 23 (column 5 had changed to column 7)
+% Update: found bug on lines 21 and 23 (column 5 had changed to column 7)
 % (6/19/2018)
 
-% output = '\\PHYS34212\MigrationData\MigrationData\Migration1\Output';
 cd(output)
-% analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\Code files v 2\analysisplan.xlsx';
-analysisplan = '\\phys34212\migrationdata\MigrationData\Migration1\Repositories\cell-migration-analysis\analysisplan.xls';
 
 [num,~,raw] = xlsread(analysisplan,'experiments');
 filenums = find(num(:,6)==0)+1;

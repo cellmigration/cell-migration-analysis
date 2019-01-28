@@ -1,4 +1,4 @@
-function [  ] = extractRawData_alt ( trackpath , output)
+function [  ] = extractRawData_alt (trackpath, output, analysisplan)
 %Reads tracking data from mat file(s), extracts x,y location of each
 %tracked cell in each stage (series). The output is a matrix where each row
 %is defined as following: 1)relative y-coordinate 2)relative x-coordinate
@@ -16,8 +16,6 @@ function [  ] = extractRawData_alt ( trackpath , output)
 % Update: adapt for old PC3 data by uncommenting lines 43-44 and 77-78
 
 % list of experiments
-% analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\code files v 2 check\analysisplan';
-analysisplan = '\\phys34212\migrationdata\MigrationData\Migration1\Repositories\cell-migration-analysis\analysisplan.xls';
 
 [num,~,raw] = xlsread(analysisplan,'experiments');
 listnums = find(num(:,3)==0)+1;

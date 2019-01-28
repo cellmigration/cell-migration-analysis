@@ -18,27 +18,27 @@ addpath(codepath);
 classMap = containers.Map({1,2},{'Control', 'HA'});
 
 % Extract metadata from nd2 files and save to output path
-extractmetadata (nd2path,output);
+extractmetadata (nd2path, output, analysisplan);
 
 % Extract raw data from tracking data
 % exTRACKtRAWdata ( trackpath , output ); % uncomment to process in batches
 tic
 disp('Extracting raw data...')
-extractRawData_alt ( trackpath , output ); % process each row individually
+extractRawData_alt (trackpath, output, analysisplan); % process each row individually
 disp('Raw data extracted!')
 toc
 
 % Extract data from rawdata and metadata
 tic
 disp('Extracting data...')
-extractData( output )
+extractData(output, analysisplan)
 disp('Data extracted!')
 toc
 
 % Extract features from data
 tic
 disp('Extracting features...')
-extractFeatures( output )
+extractFeatures(output, analysisplan)
 disp('Features extracted!')
 toc
 
@@ -46,7 +46,7 @@ toc
 % migrationvis(featurespath,output)
 tic
 disp('Visualizing features')
-visualizeFeatures( output);
+visualizeFeatures(output, analysisplan);
 disp('Features visualized!')
 tic
 

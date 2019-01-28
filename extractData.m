@@ -1,13 +1,9 @@
-function [  ] = extractData( output )
+function [  ] = extractData(output, analysisplan)
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 cd(output)
-% analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\Code files v 2\analysisplan.xlsx';
-analysisplan = '\\phys34212\migrationdata\MigrationData\Migration1\Repositories\cell-migration-analysis\analysisplan.xls';
 [num,~,raw] = xlsread(analysisplan,'experiments');
 listnums = find(num(:,5)==0)+1;
-
-
 
 for filenum = 1:length(listnums)
     curfile = num2str(raw{listnums(filenum),1});

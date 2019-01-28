@@ -9,11 +9,9 @@
 %
 % Date: 1/22/2019 PYA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [] = visualizeFeatures(output)
+function [] = visualizeFeatures(output, analysisplan)
 
 cd(output)
-
-analysisplan = '\\phys34212\migrationdata\MigrationData\Migration1\Repositories\cell-migration-analysis\analysisplan.xls';
 
 [num,~,raw] = xlsread(analysisplan,'experiments');
 filenums = find(num(:,7)==0)+1;

@@ -1,4 +1,4 @@
-function [  ] = extractmetadata ( nd2path , output )
+function [  ] = extractmetadata (nd2path, output, analysisplan)
 %Reads metadata from nd2 file(s) and saves a metadata struct variable for
 %each nd2 file. The saved variable is named as the file + '_metadata'
 %
@@ -15,8 +15,6 @@ function [  ] = extractmetadata ( nd2path , output )
 %   computer and its path should be added.
 
 %% read file names
-%analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\Code files v 2\analysisplan.xlsx';
-analysisplan = '\\phys34212\migrationdata\MigrationData\Migration1\Repositories\cell-migration-analysis\analysisplan.xls';
 [num,~,raw] = xlsread(analysisplan,'experiments');
 %Find the excel index of series whose metadata has not been read yet
 filenums = find(num(:,4)==0)+1;
