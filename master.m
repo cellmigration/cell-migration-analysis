@@ -3,7 +3,7 @@ clearvars;
 clc;
 
 % Analysis plan based on "analysisplan" excel file
-analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\Code files v 2\analysisplan.xls';
+analysisplan = '\\phys34212\migrationdata\MigrationData\Migration1\Repositories\cell-migration-analysis\analysisplan.xls';
 [~,mypath,~] = xlsread(analysisplan,'path');
 nd2path = mypath{1,2};
 trackpath = mypath{2,2};
@@ -44,3 +44,10 @@ toc
 
 % Visualize data
 % migrationvis(featurespath,output)
+tic
+disp('Visualizing features')
+visualizeFeatures( output);
+disp('Features visualized!')
+tic
+
+cd(codepath);

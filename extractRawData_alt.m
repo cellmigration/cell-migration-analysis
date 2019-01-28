@@ -17,7 +17,7 @@ function [  ] = extractRawData_alt ( trackpath , output)
 
 % list of experiments
 % analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\code files v 2 check\analysisplan';
-analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\Code files v 2\analysisplan.xls';
+analysisplan = '\\phys34212\migrationdata\MigrationData\Migration1\Repositories\cell-migration-analysis\analysisplan.xls';
 
 [num,~,raw] = xlsread(analysisplan,'experiments');
 listnums = find(num(:,3)==0)+1;

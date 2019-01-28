@@ -11,7 +11,7 @@ function [  ] = extractFeatures( output )
 % output = '\\PHYS34212\MigrationData\MigrationData\Migration1\Output';
 cd(output)
 % analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\Code files v 2\analysisplan.xlsx';
-analysisplan = '\\PHYS34212\MigrationData\MigrationData\Migration1\Code files v 2\analysisplan.xls';
+analysisplan = '\\phys34212\migrationdata\MigrationData\Migration1\Repositories\cell-migration-analysis\analysisplan.xls';
 
 [num,~,raw] = xlsread(analysisplan,'experiments');
 filenums = find(num(:,6)==0)+1;
