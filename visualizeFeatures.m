@@ -52,6 +52,10 @@ for i = 1:n_conc
     sample_size = length(ctrl_tmp_val);
     ctr_speed(i,2)= nanstd(ctrl_tmp_val)/sqrt(sample_size);
     
+    % plot speed vs. time for each condition
+    ctrl_cond_features = features(ctrl_tmp_ind,:);
+    speed_vs_time('Control',concentrations(i),ctrl_cond_features)
+    
     % compute total number of cells
     unique_cell_ind = find(isnan(ctrl_tmp_val));
     cond_cells_total = length(unique_cell_ind);
@@ -70,6 +74,10 @@ for i = 1:n_conc
     sample_size = length(ha_tmp_val);
     ha_speed(i,2)= nanstd(ha_tmp_val)/sqrt(sample_size);
     
+    % plot speed vs. time for each condition
+    ha_cond_features = features(ha_tmp_ind,:);
+    speed_vs_time('Hase',concentrations(i),ha_cond_features)
+    
     % compute total number of cells
     unique_cell_ind = find(isnan(ha_tmp_val));
     cond_cells_total = length(unique_cell_ind);
@@ -84,13 +92,13 @@ for i = 1:n_conc
 end
 
 %% Plot 
-close all
-clf
+% close all
+% clf
 
 % Set the "0" concentration to be 1 for logarithmic plot
 concentrations(1) = 1;
 
-figure(1)
+figure
 
 % Uncomment for plot without error bars
 % semilogx(concentrations,ha_speed(:,1),'r-o','Linewidth',3)
@@ -120,7 +128,7 @@ grid on;
 legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2str(sum(ctr_speed(:,3))),' cells)'],'Location','Southwest');
 %%  Plot percentage of migrating cells per condition
 
-figure(2)
+figure
 
 semilogx(concentrations,ha_speed(:,4),'r-o','Linewidth',3)
 hold on
@@ -132,3 +140,4 @@ ylabel('Cell Migration Ratio (%)','FontSize',20);
 title(['MEF Cells - Combined Experiments - ; Threshold = ',num2str(threshold),' um/min'])
 
 grid on; legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2str(sum(ctr_speed(:,3))),' cells)'],'Location','Southeast');
+
