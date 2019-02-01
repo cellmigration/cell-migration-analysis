@@ -11,6 +11,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [] = visualizeFeatures(output, analysisplan)
 
+cond_vs_exp = input('Plot speed vs time by 1) condition or 2) experiment? ');
+
 cd(output)
 
 [num,~,raw] = xlsread(analysisplan,'experiments');
@@ -52,17 +54,20 @@ for i = 1:n_conc
     ctrl_tmp_val = features(ctrl_tmp_ind,4);
     ctr_speed(i,1) = nanmean(ctrl_tmp_val);
     sample_size = length(ctrl_tmp_val);
-    ctr_speed(i,2)= nanstd(ctrl_tmp_val)/sqrt(sample_size);
-    
-    % plot speed vs. time for each condition
-    ctrl_cond_features = features(ctrl_tmp_ind,:);
-    slope_ctrl = speed_vs_time('Control',concentrations(i),ctrl_cond_features);
+    ctr_speed(i,2)= nanstd(ctrl_tmp_val)/sqrt(sample_size);        
     
     % compute total number of cells
     unique_cell_ind = find(isnan(ctrl_tmp_val));
     cond_cells_total = length(unique_cell_ind);
     ctr_speed(i,3) = cond_cells_total;
-    slope = slope + slope_ctrl*cond_cells_total/cells_total;
+    
+    % plot speed vs. time for each condition
+    if cond_vs_exp == 1
+        ctrl_cond_features = features(ctrl_tmp_ind,:);
+        slope_ctrl = speed_vs_time_cond('Control',concentrations(i),ctrl_cond_features);
+        slope = slope + slope_ctrl*cond_cells_total/cells_total;
+    end
+    
     
     % migration calculations
     initial_condition_rows = length(find(ctrl_tmp_ind > 0))-cond_cells_total;
@@ -77,15 +82,17 @@ for i = 1:n_conc
     sample_size = length(ha_tmp_val);
     ha_speed(i,2)= nanstd(ha_tmp_val)/sqrt(sample_size);
     
-    % plot speed vs. time for each condition
-    ha_cond_features = features(ha_tmp_ind,:);
-    slope_has = speed_vs_time('Hase',concentrations(i),ha_cond_features);
-    
     % compute total number of cells
     unique_cell_ind = find(isnan(ha_tmp_val));
     cond_cells_total = length(unique_cell_ind);
     ha_speed(i,3) = cond_cells_total;
-    slope = slope + slope_has*cond_cells_total/cells_total;
+    
+    % plot speed vs. time for each condition
+    if cond_vs_exp ==1
+        ha_cond_features = features(ha_tmp_ind,:);
+        slope_has = speed_vs_time_cond('Hase',concentrations(i),ha_cond_features);
+        slope = slope + slope_has*cond_cells_total/cells_total;
+    end
     
     % migration calculations
     initial_condition_rows = length(find(ha_tmp_ind>0))-cond_cells_total;
@@ -95,8 +102,7 @@ for i = 1:n_conc
     
 end
 
-display(['Weighted slope is: ', num2str(slope)])
-%% Plot 
+%% Plot speed vs concentration for each condition
 % close all
 % clf
 
@@ -111,17 +117,18 @@ figure
 % semilogx(concentrations,ctr_speed(:,1),'b-o','Linewidth',3)
 
 % Uncomment to plot all concentrations with error bars
-% errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r-o','Linewidth',3)
-% hold on
-% errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b-o','Linewidth',3)
+errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r-o','Linewidth',3)
+hold on
+errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b-o','Linewidth',3)
+text(concentrations,ctr_speed(:,1)+0.02,num2str(ctr_speed(:,3)),'FontWeight','bold')
 
 % Uncomment to plot concentrations up to 50 ug/ml with error bars
-errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
-text(concentrations,ha_speed(:,1)-0.02,num2str(ha_speed(:,3)),'FontWeight','bold')
-hold on
-errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b-o','Linewidth',3)
-text(concentrations,ctr_speed(:,1)+0.02,num2str(ctr_speed(:,3)),'FontWeight','bold')
-xlim([0 100])
+% errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
+% text(concentrations,ha_speed(:,1)-0.02,num2str(ha_speed(:,3)),'FontWeight','bold')
+% hold on
+% errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b-o','Linewidth',3)
+% text(concentrations,ctr_speed(:,1)+0.02,num2str(ctr_speed(:,3)),'FontWeight','bold')
+% xlim([0 100])
 
 set(gca,'XScale','log');
 xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
@@ -131,6 +138,8 @@ grid on;
 
 % legend('Hase','Control');
 legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2str(sum(ctr_speed(:,3))),' cells)'],'Location','Southwest');
+
+
 %%  Plot percentage of migrating cells per condition
 
 figure
@@ -145,4 +154,33 @@ ylabel('Cell Migration Ratio (%)','FontSize',20);
 title(['MEF Cells - Combined Experiments - ; Threshold = ',num2str(threshold),' um/min'])
 
 grid on; legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2str(sum(ctr_speed(:,3))),' cells)'],'Location','Southeast');
+
+
+%% Plot speed vs time per experiment
+
+if cond_vs_exp == 2
+    
+    slope = 0;
+    
+    for curfilenum = 1:length(filenums)
+        experiment = num2str(raw{filenums(curfilenum),1});
+        curfile = [experiment '_features'];
+        load(curfile);
+
+        % Calculate total number of cells per experiment
+
+        unique_cell_ind = find(isnan(features(:,4)));
+        cells_experiment = length(unique_cell_ind);
+        
+        % update slope
+
+        experiment_slope = speed_vs_time_exp(experiment, features);
+        slope = slope + experiment_slope*cells_experiment;
+    end
+
+    slope = slope/cells_total;
+    
+end
+
+display(['Weighted slope is: ', num2str(slope)])
 
