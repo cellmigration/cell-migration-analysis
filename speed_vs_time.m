@@ -19,7 +19,7 @@ rsq = 1 - sum((speeds(:,1)-f).^2)/sum((speeds(:,1)-mean(speeds(:,1))).^2);
 equationString = sprintf('y = %.3g x + %.3g', linear_fit(1), linear_fit(2));
 rsqString = sprintf('R^2 = %.3g', rsq');
 
-figure
+speed_vs_time_fig = figure;
 
 errorbar(time,speeds(:,1),speeds(:,2))
 ylim([0 2])
@@ -32,5 +32,9 @@ text(10, 1.7, rsqString) %max(speeds(:,1))+0.2
 hold off
 
 title([ctrl_or_ha,', ',num2str(concentration), ' ug/ml Fibronectin'])
-xlabel('Time (min)')
-ylabel('Cell Speed um/min')
+xlabel('Time (min)','FontSize',20)
+ylabel('Cell Speed um/min','FontSize',20)
+
+figure_directory = '\\PHYS34212\MigrationData\MigrationData\Migration1\figures\speed_vs_time\by_condition';
+figure_file_name = [figure_directory, '\',ctrl_or_ha,'_',num2str(concentration),'.png'];
+print(speed_vs_time_fig,'-dpng',figure_file_name)
