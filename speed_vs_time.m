@@ -1,4 +1,4 @@
-function [] = speed_vs_time(ctrl_or_ha,concentration,features)
+function slope = speed_vs_time(ctrl_or_ha,concentration,features)
 
 time = 5:5:36*5;
 
@@ -13,6 +13,7 @@ end
 
 % Com;pute linear fit and rsq value
 linear_fit = polyfit(time',speeds(:,1),1);
+slope = linear_fit(1); 
 f = polyval(linear_fit,time');
 rsq = 1 - sum((speeds(:,1)-f).^2)/sum((speeds(:,1)-mean(speeds(:,1))).^2);
 

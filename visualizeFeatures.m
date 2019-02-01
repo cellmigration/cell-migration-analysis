@@ -43,6 +43,8 @@ n_conc = length(concentrations);
 ctr_speed = zeros(n_conc,4); % col1 = av, col2 = sem, col3 = total cells, col4 = migration ratio
 ha_speed = zeros(n_conc,4); % col1 = av, col2 = sem, col3 = total cells, col4 = migration ratio
 
+slope = 0;
+
 for i = 1:n_conc
     
     % Calculations for control cells
@@ -54,12 +56,13 @@ for i = 1:n_conc
     
     % plot speed vs. time for each condition
     ctrl_cond_features = features(ctrl_tmp_ind,:);
-    speed_vs_time('Control',concentrations(i),ctrl_cond_features)
+    slope_ctrl = speed_vs_time('Control',concentrations(i),ctrl_cond_features);
     
     % compute total number of cells
     unique_cell_ind = find(isnan(ctrl_tmp_val));
     cond_cells_total = length(unique_cell_ind);
     ctr_speed(i,3) = cond_cells_total;
+    slope = slope + slope_ctrl*cond_cells_total/cells_total;
     
     % migration calculations
     initial_condition_rows = length(find(ctrl_tmp_ind > 0))-cond_cells_total;
@@ -76,12 +79,13 @@ for i = 1:n_conc
     
     % plot speed vs. time for each condition
     ha_cond_features = features(ha_tmp_ind,:);
-    speed_vs_time('Hase',concentrations(i),ha_cond_features)
+    slope_has = speed_vs_time('Hase',concentrations(i),ha_cond_features);
     
     % compute total number of cells
     unique_cell_ind = find(isnan(ha_tmp_val));
     cond_cells_total = length(unique_cell_ind);
     ha_speed(i,3) = cond_cells_total;
+    slope = slope + slope_has*cond_cells_total/cells_total;
     
     % migration calculations
     initial_condition_rows = length(find(ha_tmp_ind>0))-cond_cells_total;
@@ -91,6 +95,7 @@ for i = 1:n_conc
     
 end
 
+display(['Weighted slope is: ', num2str(slope)])
 %% Plot 
 % close all
 % clf
