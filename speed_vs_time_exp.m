@@ -38,4 +38,4 @@ ylabel('Cell Speed um/min','FontSize',20)
 
 figure_directory = '\\PHYS34212\MigrationData\MigrationData\Migration1\figures\speed_vs_time\by_experiment';
 figure_file_name = [figure_directory, '\',experiment,'.png'];
-print(speed_vs_time_fig,'-dpng',figure_file_name)
+% print(speed_vs_time_fig,'-dpng',figure_file_name)
