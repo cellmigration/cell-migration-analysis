@@ -111,49 +111,48 @@ concentrations(1) = 1;
 
 figure
 
+
 % Uncomment for plot without error bars
 % semilogx(concentrations,ha_speed(:,1),'r-o','Linewidth',3)
 % hold on
 % semilogx(concentrations,ctr_speed(:,1),'b-o','Linewidth',3)
 
-% Uncomment to plot all concentrations with error bars
+% Uncomment to plot all concentrations with error bars ~ text near points
 % errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r-o','Linewidth',3)
 % hold on
 % errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b-o','Linewidth',3)
-% % text(concentrations,ctr_speed(:,1)+0.02,num2str(ctr_speed(:,3)),'FontWeight','bold')
-% text(concentrations,1.05*ones(1,n_conc),num2str(ctr_speed(:,3)),'FontWeight','bold')
+% text(concentrations,ctr_speed(:,1)+0.02,num2str(ctr_speed(:,3)),'FontWeight','bold')
 % ylim([0.65 1.07])
 
-% Uncomment to plot all concentrations with error bars
-speeds = ctr_speed(:,1);
-errors = ctr_speed(:,2);
-peaks = speeds + errors/2;
-troughs = speeds - errors/2;
-
-extra_space = 0.2*(max(peaks)- min(troughs));
-
-ymax = max(peaks) + extra_space;
-ymin = min(troughs)- extra_space;
-ytext = ymax - extra_space/2;
+% Uncomment to plot all concentrations with error bars ~ text aligned, automatic plot limits
+[ymin, ymax, ytext] = plotParam(ctr_speed);
 
 errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r-o','Linewidth',3)
 hold on
 errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b-o','Linewidth',3)
-text(concentrations,ytext*ones(1,n_conc),num2str(ctr_speed(:,3)),'FontWeight','bold')
+text(concentrations,ytext*ones(1,n_conc),num2str(ctr_speed(:,3)),'Color','blue','FontWeight','bold')
 ylim([ymin ymax])
 
-
-% Uncomment to plot concentrations up to 50 ug/ml with error bars
+% Uncomment to plot concentrations up to 50 ug/ml with error bars ~ text near points
 % errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
-% % text(concentrations(1:6),ha_speed(1:6,1)-0.02,num2str(ha_speed(1:6,3)),'FontWeight','bold')
-% text(concentrations(1:6),(max(ha_speed(:,1))+0.05)*ones(1,6),num2str(ha_speed(1:6,3)),'FontWeight','bold')
+% text(concentrations(1:6),ha_speed(1:6,1)-0.02,num2str(ha_speed(1:6,3)),'FontWeight','bold')
 % hold on
 % errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b-o','Linewidth',3)
-% % text(concentrations(1:6),ctr_speed(1:6,1)+0.02,num2str(ctr_speed(1:6,3)),'FontWeight','bold')
+% text(concentrations(1:6),ctr_speed(1:6,1)+0.02,num2str(ctr_speed(1:6,3)),'FontWeight','bold')
 % text(concentrations(1:6),1.05*ones(1,6),num2str(ctr_speed(1:6,3)),'FontWeight','bold')
 % xlim([0 100])
 % ylim([0.7 1.07])
 
+% Uncomment to plot concentrations up to 50 ug/ml with error bars ~ text
+% aligned, automatic plot limits
+% [ymin, ymax, ytext] = plotParam(ctr_speed(1:6,:));
+% errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
+% % text(concentrations(1:6),(max(ha_speed(:,1))+0.05)*ones(1,6),num2str(ha_speed(1:6,3)),'FontWeight','bold')
+% hold on
+% errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b-o','Linewidth',3)
+% text(concentrations(1:6),ytext*ones(1,6),num2str(ctr_speed(1:6,3)),'Color','blue','FontWeight','bold')
+% xlim([0 100])
+% ylim([ymin ymax])
 
 set(gca,'XScale','log');
 xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
