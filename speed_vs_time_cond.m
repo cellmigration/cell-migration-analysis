@@ -11,7 +11,7 @@ for i = 1:36
     speeds(i,2) = speeds(i,1)/sqrt(length(speeds_array)-sum(isnan(speeds_array)));
 end
 
-% Com;pute linear fit and rsq value
+% Compute linear fit and rsq value
 linear_fit = polyfit(time',speeds(:,1),1);
 slope = linear_fit(1); 
 f = polyval(linear_fit,time');

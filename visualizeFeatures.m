@@ -12,6 +12,7 @@
 function [] = visualizeFeatures(output, analysisplan)
 
 cond_vs_exp = input('Plot speed vs time by 1) condition or 2) experiment? ');
+conc_range = input('Plot 1) all concentrations or 2) up to 75 ug/mL? ');
 
 cd(output)
 
@@ -125,13 +126,18 @@ figure
 % ylim([0.65 1.07])
 
 % Uncomment to plot all concentrations with error bars ~ text aligned, automatic plot limits
-[ymin, ymax, ytext] = plotParam(ctr_speed);
+if conc_range == 1
+    
+    [ymin, ymax, ytext_ctr, ytext_ha] = plotParam(ctr_speed, ha_speed);
 
-errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r-o','Linewidth',3)
-hold on
-errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b-o','Linewidth',3)
-text(concentrations,ytext*ones(1,n_conc),num2str(ctr_speed(:,3)),'Color','blue','FontWeight','bold')
-ylim([ymin ymax])
+    errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r-o','Linewidth',3)
+    text(concentrations,ytext_ha*ones(1,n_conc),num2str(ha_speed(:,3)),'Color','red','FontWeight','bold')
+
+    hold on
+    errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b-o','Linewidth',3)
+    text(concentrations,ytext_ctr*ones(1,n_conc),num2str(ctr_speed(:,3)),'Color','blue','FontWeight','bold')
+    ylim([ymin ymax])
+end
 
 % Uncomment to plot concentrations up to 50 ug/ml with error bars ~ text near points
 % errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
@@ -143,16 +149,22 @@ ylim([ymin ymax])
 % xlim([0 100])
 % ylim([0.7 1.07])
 
-% Uncomment to plot concentrations up to 50 ug/ml with error bars ~ text
-% aligned, automatic plot limits
-% [ymin, ymax, ytext] = plotParam(ctr_speed(1:6,:));
-% errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
-% % text(concentrations(1:6),(max(ha_speed(:,1))+0.05)*ones(1,6),num2str(ha_speed(1:6,3)),'FontWeight','bold')
-% hold on
-% errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b-o','Linewidth',3)
-% text(concentrations(1:6),ytext*ones(1,6),num2str(ctr_speed(1:6,3)),'Color','blue','FontWeight','bold')
-% xlim([0 100])
-% ylim([ymin ymax])
+% Uncomment to plot concentrations up to 50 ug/ml with error bars ~ text aligned, automatic plot limits
+if conc_range == 2
+    
+    [ymin, ymax, ytext_ctr, ytext_ha] = plotParam(ctr_speed(1:6,:), ha_speed(1:6,:));
+
+    errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
+    text(concentrations(1:6),ytext_ha*ones(1,6),num2str(ha_speed(1:6,3)),'Color','red','FontWeight','bold')
+
+    hold on
+
+    errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b-o','Linewidth',3)
+    text(concentrations(1:6),ytext_ctr*ones(1,6),num2str(ctr_speed(1:6,3)),'Color','blue','FontWeight','bold')
+
+    xlim([0 100])
+    ylim([ymin ymax])
+end
 
 set(gca,'XScale','log');
 xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
