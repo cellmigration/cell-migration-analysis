@@ -15,7 +15,7 @@ peaks = speeds + errors/2;
 troughs = speeds - errors/2;
 
 % compute extra space above and below plot
-extra_space = 0.2*(max(peaks) - min(troughs));
+extra_space = 0.25*(max(peaks) - min(troughs));
 
 % return plot limits and y-coordinate of text
 ymax = max(peaks) + extra_space;

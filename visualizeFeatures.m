@@ -11,7 +11,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [] = visualizeFeatures(output, analysisplan)
 
-cond_vs_exp = input('Plot speed vs time by 1) condition or 2) experiment? ');
+cond_vs_exp = input('Plot speed vs time by 1) condition or 2) experiment? 3) dist vs. time by condition 4) dist vs. time by experiment? ');
 conc_range = input('Plot 1) all concentrations or 2) up to 75 ug/mL? ');
 
 cd(output)
@@ -47,6 +47,7 @@ ctr_speed = zeros(n_conc,4); % col1 = av, col2 = sem, col3 = total cells, col4 =
 ha_speed = zeros(n_conc,4); % col1 = av, col2 = sem, col3 = total cells, col4 = migration ratio
 
 slope = 0;
+persis_coeff = [];
 
 for i = 1:n_conc
     
@@ -67,6 +68,12 @@ for i = 1:n_conc
         ctrl_cond_features = features(ctrl_tmp_ind,:);
         slope_ctrl = speed_vs_time_cond('Control',concentrations(i),ctrl_cond_features);
         slope = slope + slope_ctrl*cond_cells_total/cells_total;
+    end
+    
+    if cond_vs_exp == 3
+        ctrl_cond_features = features(ctrl_tmp_ind,:);
+        coeff_rsq = dist_vs_time_cond('Control',concentrations(i),ctrl_cond_features);
+        persis_coeff = [persis_coeff; coeff_rsq];
     end
     
     
@@ -94,6 +101,12 @@ for i = 1:n_conc
         slope_has = speed_vs_time_cond('Hase',concentrations(i),ha_cond_features);
         slope = slope + slope_has*cond_cells_total/cells_total;
     end
+    
+%     if cond_vs_exp == 3
+%         ha_cond_features = features(ha_tmp_ind,:);
+%         slope_has = dist_vs_time_cond('Hase',concentrations(i),ha_cond_features);
+%         slope = slope + slope_has*cond_cells_total/cells_total;
+%     end
     
     % migration calculations
     initial_condition_rows = length(find(ha_tmp_ind>0))-cond_cells_total;
@@ -130,13 +143,14 @@ if conc_range == 1
     
     [ymin, ymax, ytext_ctr, ytext_ha] = plotParam(ctr_speed, ha_speed);
 
-    errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r-o','Linewidth',3)
+    errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r','Linewidth',1.5)
     text(concentrations,ytext_ha*ones(1,n_conc),num2str(ha_speed(:,3)),'Color','red','FontWeight','bold')
 
     hold on
-    errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b-o','Linewidth',3)
+    errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b','Linewidth',1.5)
     text(concentrations,ytext_ctr*ones(1,n_conc),num2str(ctr_speed(:,3)),'Color','blue','FontWeight','bold')
     ylim([ymin ymax])
+    xlim([0.65 650])
 end
 
 % Uncomment to plot concentrations up to 50 ug/ml with error bars ~ text near points
@@ -154,27 +168,41 @@ if conc_range == 2
     
     [ymin, ymax, ytext_ctr, ytext_ha] = plotParam(ctr_speed(1:6,:), ha_speed(1:6,:));
 
-    errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
+    errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r','Linewidth',1.5)
     text(concentrations(1:6),ytext_ha*ones(1,6),num2str(ha_speed(1:6,3)),'Color','red','FontWeight','bold')
 
     hold on
 
-    errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b-o','Linewidth',3)
+    errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b','Linewidth',1.5)
     text(concentrations(1:6),ytext_ctr*ones(1,6),num2str(ctr_speed(1:6,3)),'Color','blue','FontWeight','bold')
 
-    xlim([0 100])
+    xlim([0.65 100])
     ylim([ymin ymax])
 end
 
 set(gca,'XScale','log');
 xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
-ylabel('Cell Speed um/min','FontSize',20);
+ylabel('Cell Speed [um/min]','FontSize',20);
 title(['MEF Cells - Combined Experiments - ',num2str(cells_total),' cells'])
 grid on; 
 
 % legend('Hase','Control');
 legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2str(sum(ctr_speed(:,3))),' cells)'],'Location','Southwest');
 
+%% Plot persistence coefficient vs. concentration
+
+% persis_coeff(:,2) = (1-persis_coeff(:,2)).*persis_coeff(:,1);
+
+figure
+% plot(concentrations, persis_coeff(:,1),'Linewidth',1.5)
+errorbar(concentrations(1:6,:), persis_coeff(1:6,1),persis_coeff(1:6,2),'Linewidth',1.5)
+
+set(gca,'XScale','log');
+xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
+ylabel('Persist. coeff. [um/min^{1/2}]','FontSize',20);
+title(['MEF Cells - Combined Experiments - ',num2str(cells_total),' cells'])
+xlim([0.65 100])
+grid on; 
 
 %%  Plot percentage of migrating cells per condition
 
@@ -216,6 +244,39 @@ if cond_vs_exp == 2
 
     slope = slope/cells_total;
     
+    display(['Weighted slope (speed vs. time) is: ', num2str(slope)])
+    
 end
 
-display(['Weighted slope is: ', num2str(slope)])
+
+
+%% Plot distance vs. time per experiment
+
+if cond_vs_exp == 4
+    
+    slope = 0;
+    
+    for curfilenum = 1:length(filenums)
+        experiment = num2str(raw{filenums(curfilenum),1});
+        curfile = [experiment '_features'];
+        load(curfile);
+
+        % Calculate total number of cells per experiment
+
+        unique_cell_ind = find(isnan(features(:,4)));
+        cells_experiment = length(unique_cell_ind);
+        
+        % update slope
+
+        experiment_slope = dist_vs_time_exp(experiment, features);
+        slope = slope + experiment_slope*cells_experiment;
+    end
+
+    slope = slope/cells_total;
+    
+    display(['Weighted slope (dist vs. time) is: ', num2str(slope)])
+    
+end
+
+
+    

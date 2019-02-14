@@ -19,6 +19,7 @@ for curfilenum = 1:length(filenums)
     SPEED = [];
     THETA = [];
     PERSISTENCE = [];
+    DIST = [];
     stages = unique(data(:,7));
     for i=1:length(stages)
         stageind = find(data(:,7)==stages(i));
@@ -32,6 +33,8 @@ for curfilenum = 1:length(filenums)
             speedvec = sqrt(diffcelldata(:,1).^2+diffcelldata(:,2).^2)./diffcelldata(:,8);
             speedvec = [nan; speedvec];
             SPEED = [SPEED; speedvec];
+            distvec = sqrt(celldata(:,1).^2+celldata(:,2).^2);
+            DIST = [DIST; distvec];
             theta = atan2d(celldata(:,1),celldata(:,2));
             persistence = diff(theta)./diffcelldata(:,8);
             persistence = [nan; persistence];
@@ -39,7 +42,7 @@ for curfilenum = 1:length(filenums)
             THETA = [THETA; theta];
        end
     end
-features = [data(:,[1,2,8]), SPEED, THETA, PERSISTENCE, data(:,5:7)];
+features = [data(:,[1,2,8]), SPEED, THETA, PERSISTENCE, data(:,5:7), DIST];
 save([curfile(1:end-4) 'features'],'features');
 xlswrite(analysisplan,1,'experiments',['I' num2str(filenums(curfilenum))]);
 end
