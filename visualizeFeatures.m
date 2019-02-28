@@ -11,7 +11,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [] = visualizeFeatures(output, analysisplan)
 
-cond_vs_exp = input('Plot speed vs time by 1) condition or 2) experiment? 3) dist vs. time by condition 4) dist vs. time by experiment? ');
+cond_vs_exp = input('Plot 1)speed vs time by condition 2) speed vs time by experiment? 3) dist vs. time by condition 4) dist vs. time by experiment 5) angle vs. time by condition 6) delta theta vs. distance');
 conc_range = input('Plot 1) all concentrations or 2) up to 75 ug/mL? ');
 
 cd(output)
@@ -70,10 +70,25 @@ for i = 1:n_conc
         slope = slope + slope_ctrl*cond_cells_total/cells_total;
     end
     
+    % plot dist vs. time for each condition
+    
     if cond_vs_exp == 3
         ctrl_cond_features = features(ctrl_tmp_ind,:);
         coeff_rsq = dist_vs_time_cond('Control',concentrations(i),ctrl_cond_features);
         persis_coeff = [persis_coeff; coeff_rsq];
+    end
+    
+    % plot msd persistence for each condition
+    % note; only useful for global behavior
+    
+%     if cond_vs_exp == 5
+%         ctrl_cond_features = features(ctrl_tmp_ind,:);
+%         msd_cond = msd('Control',concentrations(i),ctrl_cond_features);
+%     end
+
+    if cond_vs_exp == 5
+        ctrl_cond_features = features(ctrl_tmp_ind,:);
+        angle_vs_time_cond('Control',concentrations(i),ctrl_cond_features);
     end
     
     
@@ -192,17 +207,19 @@ legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2s
 %% Plot persistence coefficient vs. concentration
 
 % persis_coeff(:,2) = (1-persis_coeff(:,2)).*persis_coeff(:,1);
+if cond_vs_exp == 3
+    figure
+    % plot(concentrations, persis_coeff(:,1),'Linewidth',1.5)
+    errorbar(concentrations(1:6,:), persis_coeff(1:6,1),persis_coeff(1:6,2),'Linewidth',1.5)
 
-figure
-% plot(concentrations, persis_coeff(:,1),'Linewidth',1.5)
-errorbar(concentrations(1:6,:), persis_coeff(1:6,1),persis_coeff(1:6,2),'Linewidth',1.5)
+    set(gca,'XScale','log');
+    xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
+    ylabel('Persist. coeff. [um/min^{1/2}]','FontSize',20);
+    title(['MEF Cells - Combined Experiments - ',num2str(cells_total),' cells'])
+    xlim([0.65 100])
+    grid on; 
+end
 
-set(gca,'XScale','log');
-xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
-ylabel('Persist. coeff. [um/min^{1/2}]','FontSize',20);
-title(['MEF Cells - Combined Experiments - ',num2str(cells_total),' cells'])
-xlim([0.65 100])
-grid on; 
 
 %%  Plot percentage of migrating cells per condition
 
@@ -276,6 +293,34 @@ if cond_vs_exp == 4
     
     display(['Weighted slope (dist vs. time) is: ', num2str(slope)])
     
+end
+
+%% Plot distribution of delta thetas for all data
+
+if cond_vs_exp == 5
+    non_nan_rows = not(isnan(features(:,5)));
+%     migrating_rows = non_nan_rows(find(features(:,4) > 0.5));
+    all_angles = features(non_nan_rows,5); %angles excluding spurious 0's corresponding to the first two data points for each cell
+    figure
+    polarhistogram(all_angles,12)
+    title('MEF cells \Delta \theta distribution')
+    
+end
+
+%% Plot delta theta vs. distance 
+
+if cond_vs_exp == 6
+    figure
+    scatter(features(:,6),features(:,5))
+    xlabel('Distance [um]','FontSize',20)
+    ylabel(['Delta theta [', char(176), ']'],'FontSize',20)
+%     xlim([0 4])
+    figure
+    scatter(features(:,6)/10,features(:,5)) % the time step between points 1 and 3, 2 and 4 etc.. is 10  minutes
+    title('MEF Cells','FontSize',20)
+    xlabel('Speed [um/min]','FontSize',20)
+    ylabel(['\Delta \theta [', char(176), ']'],'FontSize',20)
+    xlim([0 4])
 end
 
 

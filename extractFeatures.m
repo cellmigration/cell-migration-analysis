@@ -13,11 +13,13 @@ cd(output)
 [num,~,raw] = xlsread(analysisplan,'experiments');
 filenums = find(num(:,6)==0)+1;
 
+% figure(100)
+
 for curfilenum = 1:length(filenums)
     curfile = [num2str(raw{filenums(curfilenum),1}) '_data'];
     load(curfile);
     SPEED = [];
-    THETA = [];
+    DELTA_THETA = [];
     PERSISTENCE = [];
     DIST = [];
     stages = unique(data(:,7));
@@ -28,21 +30,32 @@ for curfilenum = 1:length(filenums)
         for j=1:length(cells)
             cellind = find(stagedata(:,4)==cells(j));
             celldata = stagedata(cellind,:);
-            plot(celldata(:,1),celldata(:,2)); grid on; axis square;
+%             plot(celldata(:,1),celldata(:,2)); grid on; axis square;
+%             hold on
             diffcelldata = diff(celldata);
             speedvec = sqrt(diffcelldata(:,1).^2+diffcelldata(:,2).^2)./diffcelldata(:,8);
             speedvec = [nan; speedvec];
             SPEED = [SPEED; speedvec];
             distvec = sqrt(celldata(:,1).^2+celldata(:,2).^2);
             DIST = [DIST; distvec];
-            theta = atan2d(celldata(:,1),celldata(:,2));
-            persistence = diff(theta)./diffcelldata(:,8);
-            persistence = [nan; persistence];
+            theta = atan2d(diffcelldata(:,1),diffcelldata(:,2)); %absolute direction of the cell
+            persistence = zeros(size(celldata,1)-2,1);
+            for k = 1:(size(celldata,1)-2)
+                ind1 = k;
+                ind2 = k+2;
+                persistence(k) = sqrt((celldata(ind2,1)-celldata(ind1,1))^2+(celldata(ind2,2)-celldata(ind1,2))^2); % distance between point 1 and 3, 2 and 4 etc..
+            end
+            persistence = [nan; nan; persistence];
+%             theta = [nan; theta];
+            delta_theta = [nan; nan; diff(theta)];
             PERSISTENCE = [PERSISTENCE; persistence];
-            THETA = [THETA; theta];
+            DELTA_THETA = [THETA; delta_theta];
        end
     end
-features = [data(:,[1,2,8]), SPEED, THETA, PERSISTENCE, data(:,5:7), DIST];
+features = [data(:,[1,2,8]), SPEED, DELTA_THETA, PERSISTENCE, data(:,5:7), DIST];
 save([curfile(1:end-4) 'features'],'features');
 xlswrite(analysisplan,1,'experiments',['I' num2str(filenums(curfilenum))]);
+
 end
+
+% hold off
