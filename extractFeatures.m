@@ -43,13 +43,16 @@ for curfilenum = 1:length(filenums)
             for k = 1:(size(celldata,1)-2)
                 ind1 = k;
                 ind2 = k+2;
-                persistence(k) = sqrt((celldata(ind2,1)-celldata(ind1,1))^2+(celldata(ind2,2)-celldata(ind1,2))^2); % distance between point 1 and 3, 2 and 4 etc..
+                persistence(k) = sqrt((celldata(ind2,1)-celldata(ind1,1))^2+(celldata(ind2,2)-celldata(ind1,2))^2)/(celldata(ind2,8)-celldata(ind1,8)); % magnitude of average velocity between point 1 and 3, 2 and 4 etc..
             end
             persistence = [nan; nan; persistence];
 %             theta = [nan; theta];
             delta_theta = [nan; nan; diff(theta)];
+            % force values to be between -180 and 180
+            delta_theta(delta_theta>180) = delta_theta(delta_theta>180)-360;
+            delta_theta(delta_theta<-180) = delta_theta(delta_theta<-180)+360;
             PERSISTENCE = [PERSISTENCE; persistence];
-            DELTA_THETA = [THETA; delta_theta];
+            DELTA_THETA = [DELTA_THETA; delta_theta];
        end
     end
 features = [data(:,[1,2,8]), SPEED, DELTA_THETA, PERSISTENCE, data(:,5:7), DIST];
