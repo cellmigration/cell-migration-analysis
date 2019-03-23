@@ -42,8 +42,12 @@ for curfilenum = 1:length(filenums)
             persistence = zeros(size(celldata,1)-2,1);
             for k = 1:(size(celldata,1)-2)
                 ind1 = k;
-                ind2 = k+2;
-                persistence(k) = sqrt((celldata(ind2,1)-celldata(ind1,1))^2+(celldata(ind2,2)-celldata(ind1,2))^2)/(celldata(ind2,8)-celldata(ind1,8)); % magnitude of average velocity between point 1 and 3, 2 and 4 etc..
+                ind3 = k+2;
+%                 persistence(k) = sqrt((celldata(ind3,1)-celldata(ind1,1))^2+(celldata(ind3,2)-celldata(ind1,2))^2)/(celldata(ind3,8)-celldata(ind1,8)); % magnitude of average velocity (total displacement) between point 1 and 3, 2 and 4 etc..
+                ind2 = k+1;
+                dist12 = sqrt((celldata(ind2,1)-celldata(ind1,1))^2+(celldata(ind2,2)-celldata(ind1,2))^2); % distance between points 1 and 2
+                dist23 = sqrt((celldata(ind3,1)-celldata(ind2,1))^2+(celldata(ind3,2)-celldata(ind2,2))^2); % distance between points 2 and 3
+                persistence(k) = (dist12 + dist23)/(celldata(ind3,8)-celldata(ind1,8)); % average speed (total distance traveled / time) between point 1 and 3, 2 and 4 etc..
             end
             persistence = [nan; nan; persistence];
 %             theta = [nan; theta];
@@ -51,6 +55,7 @@ for curfilenum = 1:length(filenums)
             % force values to be between -180 and 180
             delta_theta(delta_theta>180) = delta_theta(delta_theta>180)-360;
             delta_theta(delta_theta<-180) = delta_theta(delta_theta<-180)+360;
+            delta_theta = abs(delta_theta);
             PERSISTENCE = [PERSISTENCE; persistence];
             DELTA_THETA = [DELTA_THETA; delta_theta];
        end

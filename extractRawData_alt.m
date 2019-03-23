@@ -33,6 +33,7 @@ for numofseries = 1:length(listnums)
     curfolder = num2str(raw{listnums(numofseries),1});
     if strcmp(curfolder,prevfolder)
         cd([trackpath '\' curfolder]);
+        
         % Read series conditions (sample naming convention: S001)
         seriesname = raw{listnums(numofseries),3};
         seriesnumber = str2double(seriesname(2:end));

@@ -11,21 +11,29 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [] = visualizeFeatures(output, analysisplan)
 
-cond_vs_exp = input('Plot 1)speed vs time by condition 2) speed vs time by experiment? 3) dist vs. time by condition 4) dist vs. time by experiment 5) angle vs. time by condition 6) delta theta vs. distance');
-conc_range = input('Plot 1) all concentrations or 2) up to 75 ug/mL? ');
+cond_vs_exp = input('Plot \n 0) speed vs. concentration \n 1) speed vs time by condition \n 2) speed vs time by experiment? \n 3) dist vs. time by condition \n 4) dist vs. time by experiment \n 5) angle vs. time by condition \n 6) delta theta vs. distance \n 7) speed vs. delta theta by condition \n 8) MSD \n 9) speed vs. delta theta all conditions');
 
 cd(output)
 
 [num,~,raw] = xlsread(analysisplan,'experiments');
 filenums = find(num(:,7)==0)+1;
+treatment = num(filenums,2);
 
 %initialize features variable
 all_features = [];
+control_features = [];
+hadase_features = [];
+
 
 for curfilenum = 1:length(filenums)
     curfile = [num2str(raw{filenums(curfilenum),1}) '_features'];
     load(curfile);
     all_features = [all_features;features];
+    if treatment(curfilenum) == 1
+        control_features = [control_features; features];
+    else % treatment(curfilenum) ==2
+        hadase_features = [hadase_features; features];
+    end
 end
 
 features = all_features;
@@ -72,25 +80,20 @@ for i = 1:n_conc
     
     % plot dist vs. time for each condition
     
-    if cond_vs_exp == 3
-        ctrl_cond_features = features(ctrl_tmp_ind,:);
-        coeff_rsq = dist_vs_time_cond('Control',concentrations(i),ctrl_cond_features);
-        persis_coeff = [persis_coeff; coeff_rsq];
-    end
+
     
     % plot msd persistence for each condition
     % note; only useful for global behavior
-    
-%     if cond_vs_exp == 5
-%         ctrl_cond_features = features(ctrl_tmp_ind,:);
-%         msd_cond = msd('Control',concentrations(i),ctrl_cond_features);
-%     end
 
     if cond_vs_exp == 5
         ctrl_cond_features = features(ctrl_tmp_ind,:);
         angle_vs_time_cond('Control',concentrations(i),ctrl_cond_features);
     end
     
+    if cond_vs_exp == 8
+        ctrl_cond_features = features(ctrl_tmp_ind,:);
+        msd_cond = msd('Control',concentrations(i),ctrl_cond_features);
+    end
     
     % migration calculations
     initial_condition_rows = length(find(ctrl_tmp_ind > 0))-cond_cells_total;
@@ -122,6 +125,20 @@ for i = 1:n_conc
 %         slope_has = dist_vs_time_cond('Hase',concentrations(i),ha_cond_features);
 %         slope = slope + slope_has*cond_cells_total/cells_total;
 %     end
+
+    if cond_vs_exp == 3
+        ctrl_cond_features = features(ctrl_tmp_ind,:);
+        ha_cond_features = features(ha_tmp_ind,:);
+        [coeff_rsq_ha, coeff_rsq_control] = dist_vs_time_cond2(concentrations(i),ha_cond_features, ctrl_cond_features);
+        persis_coeff = [persis_coeff; coeff_rsq_ha, coeff_rsq_control];
+    end
+
+    if cond_vs_exp == 7
+        ha_cond_features = features(ha_tmp_ind,:);
+        ctrl_cond_features = features(ctrl_tmp_ind,:);
+        persistence_cond3(concentrations(i), ha_cond_features, ctrl_cond_features)
+    
+    end
     
     % migration calculations
     initial_condition_rows = length(find(ha_tmp_ind>0))-cond_cells_total;
@@ -136,9 +153,13 @@ end
 % clf
 
 % Set the "0" concentration to be 1 for logarithmic plot
-concentrations(1) = 1;
 
-figure
+if cond_vs_exp == 0
+    conc_range = input('Plot 1) all concentrations or 2) up to 75 ug/mL? ');
+
+    concentrations(1) = 1;
+
+    figure
 
 
 % Uncomment for plot without error bars
@@ -154,19 +175,19 @@ figure
 % ylim([0.65 1.07])
 
 % Uncomment to plot all concentrations with error bars ~ text aligned, automatic plot limits
-if conc_range == 1
-    
-    [ymin, ymax, ytext_ctr, ytext_ha] = plotParam(ctr_speed, ha_speed);
+    if conc_range == 1
 
-    errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r','Linewidth',1.5)
-    text(concentrations,ytext_ha*ones(1,n_conc),num2str(ha_speed(:,3)),'Color','red','FontWeight','bold')
+        [ymin, ymax, ytext_ctr, ytext_ha] = plotParam(ctr_speed, ha_speed);
 
-    hold on
-    errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b','Linewidth',1.5)
-    text(concentrations,ytext_ctr*ones(1,n_conc),num2str(ctr_speed(:,3)),'Color','blue','FontWeight','bold')
-    ylim([ymin ymax])
-    xlim([0.65 650])
-end
+        errorbar(concentrations,ha_speed(:,1),ha_speed(:,2),'r','Linewidth',1.5)
+        text(concentrations,ytext_ha*ones(1,n_conc),num2str(ha_speed(:,3)),'Color','red','FontWeight','bold')
+
+        hold on
+        errorbar(concentrations,ctr_speed(:,1),ctr_speed(:,2),'b','Linewidth',1.5)
+        text(concentrations,ytext_ctr*ones(1,n_conc),num2str(ctr_speed(:,3)),'Color','blue','FontWeight','bold')
+        ylim([ymin ymax])
+        xlim([0.65 1500])
+    end
 
 % Uncomment to plot concentrations up to 50 ug/ml with error bars ~ text near points
 % errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r-o','Linewidth',3)
@@ -179,30 +200,34 @@ end
 % ylim([0.7 1.07])
 
 % Uncomment to plot concentrations up to 50 ug/ml with error bars ~ text aligned, automatic plot limits
-if conc_range == 2
+    if conc_range == 2
+
+        num_concentrations = 5;
+
+        [ymin, ymax, ytext_ctr, ytext_ha] = plotParam(ctr_speed(1:num_concentrations,:), ha_speed(1:num_concentrations,:));
+
+        errorbar(concentrations(1:num_concentrations),ha_speed(1:num_concentrations,1),ha_speed(1:num_concentrations,2),'r','Linewidth',1.5)
+        text(concentrations(1:num_concentrations),ytext_ha*ones(1,num_concentrations),num2str(ha_speed(1:num_concentrations,3)),'Color','red','FontWeight','bold')
+
+        hold on
+
+        errorbar(concentrations(1:num_concentrations),ctr_speed(1:num_concentrations,1),ctr_speed(1:num_concentrations,2),'b','Linewidth',1.5)
+        text(concentrations(1:num_concentrations),ytext_ctr*ones(1,num_concentrations),num2str(ctr_speed(1:num_concentrations,3)),'Color','blue','FontWeight','bold')
+
+        xlim([0.65 100])
+        ylim([ymin ymax])
+    end
+
+    set(gca,'XScale','log');
+    xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
+    ylabel('Cell Speed [um/min]','FontSize',20);
+    title(['MEF Cells - Combined Experiments - ',num2str(cells_total),' cells'])
+    grid on; 
+
+    % legend('Hase','Control');
+    legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2str(sum(ctr_speed(:,3))),' cells)'],'Location','Southwest');
     
-    [ymin, ymax, ytext_ctr, ytext_ha] = plotParam(ctr_speed(1:6,:), ha_speed(1:6,:));
-
-    errorbar(concentrations(1:6),ha_speed(1:6,1),ha_speed(1:6,2),'r','Linewidth',1.5)
-    text(concentrations(1:6),ytext_ha*ones(1,6),num2str(ha_speed(1:6,3)),'Color','red','FontWeight','bold')
-
-    hold on
-
-    errorbar(concentrations(1:6),ctr_speed(1:6,1),ctr_speed(1:6,2),'b','Linewidth',1.5)
-    text(concentrations(1:6),ytext_ctr*ones(1,6),num2str(ctr_speed(1:6,3)),'Color','blue','FontWeight','bold')
-
-    xlim([0.65 100])
-    ylim([ymin ymax])
 end
-
-set(gca,'XScale','log');
-xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
-ylabel('Cell Speed [um/min]','FontSize',20);
-title(['MEF Cells - Combined Experiments - ',num2str(cells_total),' cells'])
-grid on; 
-
-% legend('Hase','Control');
-legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2str(sum(ctr_speed(:,3))),' cells)'],'Location','Southwest');
 
 %% Plot persistence coefficient vs. concentration
 
@@ -210,13 +235,21 @@ legend(['Hase',' (',num2str(sum(ha_speed(:,3))),' cells)'],['Control ','(',num2s
 if cond_vs_exp == 3
     figure
     % plot(concentrations, persis_coeff(:,1),'Linewidth',1.5)
-    errorbar(concentrations(1:6,:), persis_coeff(1:6,1),persis_coeff(1:6,2),'Linewidth',1.5)
+    concentrations(1) = 1;
+    
+    num_concentrations = 5;
+    
+    errorbar(concentrations(1:num_concentrations,:), persis_coeff(1:num_concentrations,1),persis_coeff(1:num_concentrations,2),'Linewidth',1.5, 'color',[0.8500, 0.3250, 0.0980])
+    hold on
+    errorbar(concentrations(1:num_concentrations,:), persis_coeff(1:num_concentrations,4),persis_coeff(1:num_concentrations,5),'Linewidth',1.5, 'color', [0, 0.4470, 0.7410])
 
     set(gca,'XScale','log');
-    xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
+%     xlabel('Fibronectin Concentration [ug/mL]','FontSize',20);
+    xlabel('Collagen Concentration [ug/mL]','FontSize',20);
     ylabel('Persist. coeff. [um/min^{1/2}]','FontSize',20);
-    title(['MEF Cells - Combined Experiments - ',num2str(cells_total),' cells'])
-    xlim([0.65 100])
+%     title(['MEF Cells - Combined Experiments - ',num2str(cells_total),' cells'])
+    title(['PC3 Cells - Combined Experiments - ',num2str(cells_total),' cells'])
+    xlim([0.65 1500])
     grid on; 
 end
 
@@ -310,18 +343,20 @@ end
 %% Plot delta theta vs. distance 
 
 if cond_vs_exp == 6
-    figure
-    scatter(features(:,6),features(:,5))
-    xlabel('Distance [um]','FontSize',20)
-    ylabel(['Delta theta [', char(176), ']'],'FontSize',20)
-%     xlim([0 4])
-    figure
-    scatter(features(:,6)/10,features(:,5)) % the time step between points 1 and 3, 2 and 4 etc.. is 10  minutes
+
+    figure(233)
+    scatter(features(:,5),features(:,6),'ro') % the time step between points 1 and 3, 2 and 4 etc.. is 10  minutes
     title('MEF Cells','FontSize',20)
     xlabel('Speed [um/min]','FontSize',20)
     ylabel(['\Delta \theta [', char(176), ']'],'FontSize',20)
-    xlim([0 4])
+    hold on
+    hadase_pers = [features(:,5) features(:,6)];
 end
 
+%% Plot speed vs. delta theta for all conditions
 
-    
+if cond_vs_exp == 9
+    control_pers = [control_features(:,5) control_features(:,6)];
+    hadase_pers = [hadase_features(:,5) hadase_features(:,6)];
+    persistence_analysis(control_pers, hadase_pers)
+end
