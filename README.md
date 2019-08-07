@@ -11,3 +11,5 @@ following:
 3) extractData: extracts data from rawdata and metadata
 
 4) extractFeatures: extracts features (speed, persistence and angle) from the data
+
+5) visualizeFeatures: displays various features 

@@ -19,9 +19,6 @@ function [  ] = extractmetadata (nd2path, output, analysisplan)
 %Find the excel index of series whose metadata has not been read yet
 filenums = find(num(:,4)==0)+1;
 
-% load analysisplan1
-% filenums = find(analysisplan1(:,7)==0);
-
 % read files
 for curfilenum = 1:size(filenums,1)
     % read name of nd2 file; convert to string if necessary
@@ -63,6 +60,6 @@ for curfilenum = 1:size(filenums,1)
     xlswrite(analysisplan,1,'experiments',['G' num2str(filenums(curfilenum))]);
 end
 if(isempty(filenums))
-    fprintf('metadata for experiments in the list were already extracted\n')
+    fprintf('Metadata for experiments in the list were already extracted\n')
 end
 end

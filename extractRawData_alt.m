@@ -1,8 +1,8 @@
 function [  ] = extractRawData_alt (trackpath, output, analysisplan)
 %Reads tracking data from mat file(s), extracts x,y location of each
-%tracked cell in each stage (series). The output is a matrix where each row
-%is defined as following: 1)relative y-coordinate 2)relative x-coordinate
-%3)frame number 4)cell ID 5)series number
+%tracked cell in each stage (series). The output is a matrix where each
+%column is defined as following: 1)relative y-coordinate 2)relative 
+%x-coordinate 3)frame number 4)cell ID 5)series number
 
 %   trackpath is the path where the mat files are found and outputpath is
 %   where the raw variable will be saved. Each tracking data file should
@@ -11,9 +11,11 @@ function [  ] = extractRawData_alt (trackpath, output, analysisplan)
 
 % Update: now extracts raw data from tracking files for each row in the 
 %         analysis plan. Series collagen concentration, treatment and
-%         series number are in the last 3 columns of raw data matrix.
+%         series number are in the last 3 columns of raw data matrix. PYA
 %
-% Update: adapt for old PC3 data by uncommenting lines 43-44 and 77-78
+% Update: Series name should be based on this format: S001 - S100 for 
+%         tracks from 1 to 100. Adapt for previous template 
+%         ('yyyymmddCOL123C123S12')by uncommenting lines 43-44 and 77-78
 
 % list of experiments
 
@@ -41,7 +43,6 @@ for numofseries = 1:length(listnums)
         % Uncomment for old PC3 data (sample naming convention: 20171107HAC1S47)
 %         seriesname = raw{listnums(numofseries),3};
 %         seriesnumber = str2double(seriesname(end-1:end));
-        
         
         seriescollconc = raw{listnums(numofseries),4}; % collagen concentration
         seriestreat = raw{listnums(numofseries),5}; % experimental treatment (1 = control, 2 = HA)
@@ -100,7 +101,6 @@ end
 
 cd(output)
 save([curfolder '_rawdata'],'rawdata');
-
 
 end
 

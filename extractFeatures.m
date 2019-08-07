@@ -15,12 +15,14 @@ filenums = find(num(:,6)==0)+1;
 
 % figure(100)
 
+% downsampling_factor = input('Please input downsampling factor: ');
+
 for curfilenum = 1:length(filenums)
     curfile = [num2str(raw{filenums(curfilenum),1}) '_data'];
     load(curfile);
     SPEED = [];
     DELTA_THETA = [];
-    PERSISTENCE = [];
+    AV_SPEED = [];
     DIST = [];
     stages = unique(data(:,7));
     for i=1:length(stages)
@@ -30,6 +32,7 @@ for curfilenum = 1:length(filenums)
         for j=1:length(cells)
             cellind = find(stagedata(:,4)==cells(j));
             celldata = stagedata(cellind,:);
+%             celldata = downsample(celldata, downsampling_factor);
 %             plot(celldata(:,1),celldata(:,2)); grid on; axis square;
 %             hold on
             diffcelldata = diff(celldata);
@@ -56,13 +59,17 @@ for curfilenum = 1:length(filenums)
             delta_theta(delta_theta>180) = delta_theta(delta_theta>180)-360;
             delta_theta(delta_theta<-180) = delta_theta(delta_theta<-180)+360;
             delta_theta = abs(delta_theta);
-            PERSISTENCE = [PERSISTENCE; persistence];
+            AV_SPEED = [AV_SPEED; persistence];
             DELTA_THETA = [DELTA_THETA; delta_theta];
        end
     end
-features = [data(:,[1,2,8]), SPEED, DELTA_THETA, PERSISTENCE, data(:,5:7), DIST];
+features = [data(:,[1,2,8]), SPEED, DELTA_THETA, AV_SPEED, data(:,5:7), DIST];
 save([curfile(1:end-4) 'features'],'features');
 xlswrite(analysisplan,1,'experiments',['I' num2str(filenums(curfilenum))]);
+
+if(isempty(listnums))
+    fprintf('Features for experiments in the list were already extracted\n')
+end
 
 end
 
